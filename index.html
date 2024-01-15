@@ -12,9 +12,39 @@
     <button onclick="checkGuess()">Submit Guess</button>
 
     <script>
-        // Your JavaScript game logic goes here
-        // For simplicity, you may want to use an external script file
-        // and include it using <script src="your-script.js"></script>
+       import java.util.Random;
+import java.util.Scanner;
+
+public class NumberGuessingGame {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        Random random = new Random();
+
+        System.out.println("Welcome to the Number Guessing Game!");
+        System.out.println("I've selected a random number between 1 and 100. Try to guess it!");
+
+        int randomNumber = random.nextInt(100) + 1;
+        int numberOfTries = 0;
+        boolean hasGuessedCorrectly = false;
+
+        while (!hasGuessedCorrectly) {
+            System.out.print("Enter your guess: ");
+            int userGuess = scanner.nextInt();
+            numberOfTries++;
+
+            if (userGuess == randomNumber) {
+                hasGuessedCorrectly = true;
+            } else if (userGuess < randomNumber) {
+                System.out.println("Too low! Try again.");
+            } else {
+                System.out.println("Too high! Try again.");
+            }
+        }
+
+        System.out.println("Congratulations! You've guessed the number in " + numberOfTries + " tries.");
+    }
+}
+"></script>
     </script>
 </body>
 </html>
