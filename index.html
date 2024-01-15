@@ -1,44 +1,25 @@
-mkdir article-upload-website
-cd article-upload-website
-npm install express multer
-const express = require('express');
-const multer = require('multer');
-const path = require('path');
-const app = express();
-const port = 3000;
+pip install tensorflow
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.applications.inception_v3 import InceptionV3
+from tensorflow.keras.applications.inception_v3 import preprocess_input, decode_predictions
+import numpy as np
 
-// Set up storage for uploaded articles
-const storage = multer.diskStorage({
-  destination: './uploads/articles',
-  filename: function (req, file, cb) {
-    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-  }
-});
+# Load pre-trained InceptionV3 model
+model = InceptionV3(weights='imagenet')
 
-const upload = multer({ storage: storage });
+# Load and preprocess an image
+img_path = 'path/to/your/image.jpg'
+img = image.load_img(img_path, target_size=(299, 299))
+img_array = image.img_to_array(img)
+img_array = np.expand_dims(img_array, axis=0)
+img_array = preprocess_input(img_array)
 
-app.use(express.static('public')); // Serve static files (like uploaded articles)
+# Make predictions
+predictions = model.predict(img_array)
 
-// Serve HTML page
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/public/index.html');
-});
-
-// Handle article upload
-app.post('/upload', upload.single('articleFile'), (req, res) => {
-  // Store the uploaded article details (you can save this to a database in a real application)
-  const articleDetails = {
-    title: req.body.title,
-    author: req.body.author,
-    filePath: req.file.path,
-  };
-
-  // Respond with a success message (you can customize this)
-  res.send('Article uploaded successfully!');
-});
-
-app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port}`);
-});
-node server.js
-
+# Decode and print the top-3 predicted classes
+decoded_predictions = decode_predictions(predictions, top=3)[0]
+for i, (imagenet_id, label, score) in enumerate(decoded_predictions):
+    print(f"{i + 1}: {label} ({score:.2f})")
