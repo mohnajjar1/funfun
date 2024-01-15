@@ -3,48 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Number Guessing Game</title>
+    <title>Simple Action Game</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js"></script>
 </head>
 <body>
-    <h1>Welcome to the Number Guessing Game!</h1>
-    <p id="message"></p>
-    <input type="number" id="guessInput" placeholder="Enter your guess">
-    <button onclick="checkGuess()">Submit Guess</button>
 
-    <script>
-       import java.util.Random;
-import java.util.Scanner;
-
-public class NumberGuessingGame {
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        Random random = new Random();
-
-        System.out.println("Welcome to the Number Guessing Game!");
-        System.out.println("I've selected a random number between 1 and 100. Try to guess it!");
-
-        int randomNumber = random.nextInt(100) + 1;
-        int numberOfTries = 0;
-        boolean hasGuessedCorrectly = false;
-
-        while (!hasGuessedCorrectly) {
-            System.out.print("Enter your guess: ");
-            int userGuess = scanner.nextInt();
-            numberOfTries++;
-
-            if (userGuess == randomNumber) {
-                hasGuessedCorrectly = true;
-            } else if (userGuess < randomNumber) {
-                System.out.println("Too low! Try again.");
-            } else {
-                System.out.println("Too high! Try again.");
-            }
+<script>
+    // Phaser.js configuration
+const config = {
+    type: Phaser.AUTO,
+    width: 800,
+    height: 600,
+    physics: {
+        default: 'arcade',
+        arcade: {
+            gravity: { y: 300 },
+            debug: false
         }
-
-        System.out.println("Congratulations! You've guessed the number in " + numberOfTries + " tries.");
+    },
+    scene: {
+        preload: preload,
+        create: create,
+        update: update
     }
+};
+
+// Initialize the Phaser game
+const game = new Phaser.Game(config);
+
+function preload() {
+    // Load game assets (images, sounds, etc.)
+    this.load.image('sky', 'assets/sky.png');
+    this.load.image('ground', 'assets/platform.png');
+    this.load.spritesheet('player', 'assets/player.png', { frameWidth: 32, frameHeight: 48 });
 }
-"></script>
-    </script>
+
+function create() {
+    // Create game elements (background, platforms, player, etc.)
+    this.add.image(400, 300, 'sky');
+
+    const platforms = this.physics.add.staticGroup();
+    platforms.create(400, 568, 'ground').setScale(2).refreshBody();
+
+    const player = this.physics.add.sprite(100, 450, 'player');
+    player.setBounce(0.2);
+    player.setCollideWorldBounds(true);
+
+    this.physics.add.collider(player, platforms);
+
+    // Add more game elements and logic as needed
+}
+
+function update() {
+    // Update game logic (user input, physics, animations, etc.)
+}
+
+</script>
+
 </body>
 </html>
