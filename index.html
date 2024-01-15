@@ -1,25 +1,87 @@
-pip install tensorflow
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras.preprocessing import image
-from tensorflow.keras.applications.inception_v3 import InceptionV3
-from tensorflow.keras.applications.inception_v3 import preprocess_input, decode_predictions
-import numpy as np
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
 
-# Load pre-trained InceptionV3 model
-model = InceptionV3(weights='imagenet')
+// Player
+const player = {
+    x: 50,
+    y: canvas.height - 30,
+    width: 20,
+    height: 20,
+    color: 'blaue',
+    speed: 5,
+};
 
-# Load and preprocess an image
-img_path = 'path/to/your/image.jpg'
-img = image.load_img(img_path, target_size=(299, 299))
-img_array = image.img_to_array(img)
-img_array = np.expand_dims(img_array, axis=0)
-img_array = preprocess_input(img_array)
+// Obstacles
+const obstacles = [];
 
-# Make predictions
-predictions = model.predict(img_array)
+function drawPlayer() {
+    ctx.fillStyle = player.color;
+    ctx.fillRect(player.x, player.y, player.width, player.height);
+}
 
-# Decode and print the top-3 predicted classes
-decoded_predictions = decode_predictions(predictions, top=3)[0]
-for i, (imagenet_id, label, score) in enumerate(decoded_predictions):
-    print(f"{i + 1}: {label} ({score:.2f})")
+function drawObstacles() {
+    for (const obstacle of obstacles) {
+        ctx.fillStyle = obstacle.color;
+        ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+    }
+}
+
+function updateObstacles() {
+    if (Math.random() < 0.02) {
+        const obstacle = {
+            x: canvas.width,
+            y: canvas.height - 30,
+            width: 20,
+            height: 20,
+            color: 'red',
+            speed: 5,
+        };
+        obstacles.push(obstacle);
+    }
+
+    for (const obstacle of obstacles) {
+        obstacle.x -= obstacle.speed;
+
+        if (obstacle.x + obstacle.width < 0) {
+            obstacles.shift(); // Remove off-screen obstacles
+        }
+
+        // Collision detection
+        if (
+            player.x < obstacle.x + obstacle.width &&
+            player.x + player.width > obstacle.x &&
+            player.y < obstacle.y + obstacle.height &&
+            player.y + player.height > obstacle.y
+        ) {
+            alert('Game Over!');
+            resetGame();
+        }
+    }
+}
+
+function resetGame() {
+    player.x = 50;
+    player.y = canvas.height - 30;
+    obstacles.length = 0; // Clear obstacles array
+}
+
+function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawPlayer();
+    drawObstacles();
+    updateObstacles();
+
+    // Move player
+    window.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowUp' && player.y > 0) {
+            player.y -= player.speed;
+        } else if (e.key === 'ArrowDown' && player.y < canvas.height - player.height) {
+            player.y += player.speed;
+        }
+    });
+
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
