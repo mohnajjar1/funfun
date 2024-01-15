@@ -1,64 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Action Game</title>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js"></script>
-</head>
-<body>
+mkdir article-upload-website
+cd article-upload-website
+npm install express multer
+const express = require('express');
+const multer = require('multer');
+const path = require('path');
+const app = express();
+const port = 3000;
 
-<script>
-    // Phaser.js configuration
-const config = {
-    type: Phaser.AUTO,
-    width: 800,
-    height: 600,
-    physics: {
-        default: 'arcade',
-        arcade: {
-            gravity: { y: 300 },
-            debug: false
-        }
-    },
-    scene: {
-        preload: preload,
-        create: create,
-        update: update
-    }
-};
+// Set up storage for uploaded articles
+const storage = multer.diskStorage({
+  destination: './uploads/articles',
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+  }
+});
 
-// Initialize the Phaser game
-const game = new Phaser.Game(config);
+const upload = multer({ storage: storage });
 
-function preload() {
-  
-    this.load.image('sky', 'assets/sky.png');
-    this.load.image('ground', 'assets/platform.png');
-    this.load.spritesheet('player', 'assets/player.png', { frameWidth: 32, frameHeight: 48 });
-}
+app.use(express.static('public')); // Serve static files (like uploaded articles)
 
-function create() {
-    // Create game elements (background, platforms, player, etc.)
-    this.add.image(400, 300, 'sky');
+// Serve HTML page
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/public/index.html');
+});
 
-    const platforms = this.physics.add.staticGroup();
-    platforms.create(400, 568, 'ground').setScale(2).refreshBody();
+// Handle article upload
+app.post('/upload', upload.single('articleFile'), (req, res) => {
+  // Store the uploaded article details (you can save this to a database in a real application)
+  const articleDetails = {
+    title: req.body.title,
+    author: req.body.author,
+    filePath: req.file.path,
+  };
 
-    const player = this.physics.add.sprite(100, 450, 'player');
-    player.setBounce(0.2);
-    player.setCollideWorldBounds(true);
+  // Respond with a success message (you can customize this)
+  res.send('Article uploaded successfully!');
+});
 
-    this.physics.add.collider(player, platforms);
+app.listen(port, () => {
+  console.log(`Server listening at http://localhost:${port}`);
+});
+node server.js
 
-    // Add more game elements and logic as needed
-}
-
-function update() {
-    // Update game logic (user input, physics, animations, etc.)
-}
-
-</script>
-
-</body>
-</html>
